@@ -10,7 +10,7 @@ public class Api {
     public static ApiInterface getClient() {
         // change your base URL
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.115.175:8000/") //Set the Root URL
+                .baseUrl("http://140.184.33.68:8000/") //Set the Root URL
                 .addConverterFactory(GsonConverterFactory.create())
                 .build(); //Finally building the adapter
 

@@ -52,7 +52,7 @@ def getUnrestrictedListOfHotels(request):
 
 
 @api_view(["POST"])
-#@permission_classes((API_Auth, ))
+@permission_classes((API_Auth, ))
 def reservationConfirmation(request):
     '''
     This function helps in reserving a hotel. It will check the hotel's availability

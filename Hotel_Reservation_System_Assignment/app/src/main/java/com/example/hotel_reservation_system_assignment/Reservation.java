@@ -25,6 +25,12 @@ public class Reservation {
     private List<GuestData> guestsList = null;
 
 
+//    private String hotelName;
+//    private String checkin;
+//    private String checkout;
+//    private List<GuestData> guestsList = null;
+
+
     public String getHotelName() {
         return hotelName;
     }

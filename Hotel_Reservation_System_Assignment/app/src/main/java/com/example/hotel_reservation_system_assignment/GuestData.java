@@ -9,11 +9,11 @@ import javax.annotation.Generated;
 public class GuestData {
     @SerializedName("guest_name")
     @Expose
-    String guest_name;
+    private String guest_name;
 
     @SerializedName("gender")
     @Expose
-    String gender;
+    private String gender;
 
     public GuestData(String guest_name, String gender) {
         this.guest_name = guest_name;

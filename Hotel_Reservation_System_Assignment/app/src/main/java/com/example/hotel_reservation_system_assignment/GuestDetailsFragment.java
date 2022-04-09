@@ -16,10 +16,15 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import okhttp3.ResponseBody;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,6 +37,7 @@ public class GuestDetailsFragment extends Fragment { //implements ItemClickListe
     Button submitButton;
     View view;
     List<GuestData> guestDataList;
+    String result;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,89 +82,51 @@ public class GuestDetailsFragment extends Fragment { //implements ItemClickListe
                 reservation.setCheckout(checkOutDate);
                 reservation.setGuestsList(guestDataList);
 
-//                Reservation2 reservation2 = new Reservation2();
-//                reservation2.setHotel_name(hotelName);
-//                reservation2.setCheckin(checkInDate);
-//                reservation2.setCheckout(checkOutDate);
-//                reservation2.setGuests_list(guestDataList);
+
+                Gson gson = new Gson();
+                String result = gson.toJson(reservation);
+                Log.i("serialized", result);
+                RequestBody body = RequestBody.create(MediaType.parse("text/plain"), result);
 
 
-                Call<POST> call = Api.getClient().getReservation(guestDataList,
-                        hotelName, checkInDate, checkOutDate);
-                call.enqueue(new Callback<POST>() {
+
+
+                final String[] res = new String[1];
+                Call<ReservationConfirmation> call = Api.getClient().getReservation(reservation);
+                call.enqueue(new Callback<ReservationConfirmation>() {
                     @Override
-                    public void onResponse(@NonNull Call<POST> call, @NonNull Response<POST> response) {
+                    public void onResponse(@NonNull Call<ReservationConfirmation> call, @NonNull Response<ReservationConfirmation> response) {
+                        ReservationConfirmation obj = new ReservationConfirmation();
+                        if(response.body() != null) {
+                            obj.setConfirmationNumber(response.body().getConfirmationNumber());
+                            Bundle bundle = new Bundle();
+                            bundle.putString("confirmation_number",obj.getConfirmationNumber() );
+                            Log.i("res number:", obj.getConfirmationNumber());
 
-                        Log.i("hey2:", String.valueOf(response));
-                        if(response != null) {
+                            ReservationConfirmationFragment reservationConfirmationFragment = new ReservationConfirmationFragment();
+                            reservationConfirmationFragment.setArguments(bundle);
 
-                            Log.i("hey2:", "yippie");
+                            FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
+                            fragmentTransaction.remove(GuestDetailsFragment.this);
+                            fragmentTransaction.replace(R.id.main_layout, reservationConfirmationFragment);
+                            fragmentTransaction.addToBackStack(null);
+                            fragmentTransaction.commitAllowingStateLoss();
                         }
                         else{
                             Toast.makeText(getActivity(), "Could Not Complete The Reservation", Toast.LENGTH_SHORT).show();
                         }
+
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<POST> call, Throwable t) {
+                    public void onFailure(@NonNull Call<ReservationConfirmation> call, Throwable t) {
                         Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
                         call.cancel();
                     }
                 });
 
-//                Call<ReservationConfirmation> call = Api.getClient().getReservation(reservation);
-//                call.enqueue(new Callback<ReservationConfirmation>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<ReservationConfirmation> call, @NonNull Response<ReservationConfirmation> response) {
-//
-//                        if(response.body() != null) {
-//
-//                            Log.i("hey2:", String.valueOf(response.body()));
-//                        }
-//                        else{
-//                            Toast.makeText(getActivity(), "Could Not Complete The Reservation", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<ReservationConfirmation> call, Throwable t) {
-//                        Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
-//                        call.cancel();
-//                    }
-//                });
-//                Call<Reservation> call = Api.getClient().getReservation(reservation);
-//                call.enqueue(new Callback<Reservation>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<Reservation> call, @NonNull Response<Reservation> response) {
-//                        Reservation reservationResponse = response.body();
-//
-//                        if(reservationResponse != null) {
-//                            String confirmationNumber = reservationResponse.getconfirmationNumber();
-//                            Log.i("hey:","yippie");
-//                            assert savedInstanceState != null;
-//                            savedInstanceState.putString("confirmation_number", confirmationNumber);
-//                            Log.i("hey2:","yippie2");
-//                        }
-//                        else{
-//                            Toast.makeText(getActivity(), "Could Not Complete The Reservation", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<Reservation> call, Throwable t) {
-//                        Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
-//                        call.cancel();
-//                    }
-//                });
 
-//                ReservationConfirmationFragment reservationConfirmationFragment = new ReservationConfirmationFragment();
-//                reservationConfirmationFragment.setArguments(savedInstanceState);
-//
-//                FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
-//                fragmentTransaction.remove(GuestDetailsFragment.this);
-//                fragmentTransaction.replace(R.id.main_layout, reservationConfirmationFragment);
-//                fragmentTransaction.addToBackStack(null);
-//                fragmentTransaction.commitAllowingStateLoss();
+
             }
         });
     }
